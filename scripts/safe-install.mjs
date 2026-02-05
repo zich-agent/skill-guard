@@ -182,6 +182,24 @@ async function main() {
     if (blocked && !force) {
       console.log(`🚫 BLOCKED — ${slug} has ${risk}-level findings (threshold: ${threshold})`);
       console.log("");
+
+      // Context: check if this looks like a legit API skill vs malicious
+      const hasHttp = scanResult.findings?.some((f) => f.id === "outbound-http");
+      const hasExfil = scanResult.findings?.some((f) => f.id?.startsWith?.("exfil-"));
+      const hasCred = scanResult.findings?.some((f) => f.id?.startsWith?.("read-ssh") || f.id?.startsWith?.("read-cred") || f.id === "keychain-access");
+
+      if (hasHttp && !hasExfil && !hasCred) {
+        console.log("ℹ️  This skill makes API calls and reads configuration — common for API integration skills.");
+        console.log("   Review with --verbose to verify endpoints are legitimate before proceeding.");
+        console.log("");
+      }
+
+      if (hasExfil || hasCred) {
+        console.log("🚨 This skill contains patterns that may exfiltrate data or access credentials.");
+        console.log("   Do NOT install unless you have manually reviewed the source code.");
+        console.log("");
+      }
+
       console.log("Options:");
       console.log(`  --threshold ${risk}    Allow this risk level`);
       console.log(`  --force              Install anyway (not recommended)`);

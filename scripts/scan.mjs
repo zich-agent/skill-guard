@@ -497,14 +497,43 @@ async function main() {
     `Summary: ${counts.safe} Safe | ${counts.low} Low | ${counts.medium} Medium | ${counts.high} High | ${counts.critical} Critical`
   );
 
+  // Contextual explanations for common patterns
+  const apiSkills = results.filter((r) => {
+    if (r.risk === "safe" || r.risk === "low") return false;
+    const hasHttp = r.findings.some((f) => f.id === "outbound-http");
+    const hasEnv = r.findings.some((f) => f.id === "env-dump" || f.id === "env-access");
+    const hasExfil = r.findings.some((f) => f.id.startsWith("exfil-"));
+    const hasCred = r.findings.some((f) => f.id.startsWith("read-ssh") || f.id.startsWith("read-cred") || f.id === "keychain-access");
+    // API skill = HTTP + env but no exfiltration or credential theft
+    return hasHttp && !hasExfil && !hasCred;
+  });
+
+  if (apiSkills.length > 0) {
+    console.log();
+    console.log(
+      `ℹ️  Note: ${apiSkills.map((s) => s.name).join(", ")} flagged for HTTP requests + env/config access.`
+    );
+    console.log(
+      "   This is normal for API integration skills (they need to call external APIs and read API keys)."
+    );
+    console.log(
+      "   Review the endpoints in --verbose output to confirm they're hitting legitimate services."
+    );
+  }
+
   if (counts.critical > 0 || counts.high > 0) {
     console.log();
     console.log(
-      "⚠️  ATTENTION: Skills with High/Critical findings should be reviewed or removed immediately."
+      "⚠️  ATTENTION: Skills with High/Critical findings should be reviewed."
     );
     console.log(
       "   Run with --verbose for full details including matched line content."
     );
+    if (apiSkills.some((s) => s.risk === "high")) {
+      console.log(
+        "   High-risk API skills may be safe — verify endpoints are legitimate (not exfiltrating data)."
+      );
+    }
   }
 
   console.log();
