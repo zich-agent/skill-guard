@@ -1,5 +1,3 @@
-<![CDATA[<div align="center">
-
 # 🛡️ skill-guard
 
 **Security scanner & pre-install gate for OpenClaw skills**
@@ -8,8 +6,6 @@ Stop malicious skills before they touch your system.
 
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-skill-blue)](https://openclaw.ai)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-
-</div>
 
 ---
 
@@ -22,7 +18,7 @@ Not every skill on ClawHub is safe. Some contain:
 - 🚪 Reverse shells and backdoors
 - 🎭 Obfuscated payloads (base64-encoded commands, eval chains)
 
-**skill-guard** scans skills *before* installation and blocks anything suspicious.
+**skill-guard** scans skills _before_ installation and blocks anything suspicious.
 
 ---
 
@@ -43,19 +39,29 @@ node skills/skill-guard/scripts/setup.mjs
 ## How It Works
 
 ```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  clawhub     │ ──▶ │  Download to │ ──▶ │  Scan for    │
-│  install foo │     │  temp dir    │     │  50+ patterns│
-└──────────────┘     └──────────────┘     └──────┬───────┘
-                                                  │
-                                          ┌───────▼───────┐
-                                          │   Safe?       │
-                                          └───────┬───────┘
-                                            ╱           ╲
-                                      ✅ Yes            🔴 No
-                                        │                 │
-                                   Install to         Block + show
-                                   skills/            findings
+  clawhub install foo
+         │
+         ▼
+  ┌──────────────┐
+  │ Download to  │
+  │  temp dir    │
+  └──────┬───────┘
+         │
+         ▼
+  ┌──────────────┐
+  │  Scan for    │
+  │ 50+ patterns │
+  └──────┬───────┘
+         │
+         ▼
+      Safe?
+      /    \
+    Yes     No
+     │       │
+     ▼       ▼
+  Install   Block +
+  to        show
+  skills/   findings
 ```
 
 The skill never reaches your system unless it passes.
@@ -70,6 +76,8 @@ The skill never reaches your system unless it passes.
 # Install only if the skill passes security scan
 node skills/skill-guard/scripts/safe-install.mjs weather
 ```
+
+**Example output — safe skill:**
 
 ```
 🛡️  skill-guard — Pre-Install Security Gate
@@ -89,6 +97,8 @@ Done! Skill installed safely.
 ```bash
 node skills/skill-guard/scripts/safe-install.mjs shady-skill
 ```
+
+**Example output — blocked skill:**
 
 ```
 🛡️  skill-guard — Pre-Install Security Gate
@@ -128,7 +138,7 @@ node skills/skill-guard/scripts/scan.mjs --json
 
 | Flag | Description |
 |------|-------------|
-| `--threshold <level>` | Allow installs up to this risk level (`low`, `medium`) |
+| `--threshold` | Allow installs up to this risk level (`low`, `medium`) |
 | `--verbose` | Show all matched lines and patterns |
 | `--force` | Install despite findings (not recommended) |
 | `--json` | Machine-readable output |
@@ -228,9 +238,4 @@ Yes, with `--force`. But you'll see the findings first and can make an informed 
 
 ---
 
-<div align="center">
-
 Built by [ClawPacks](https://clawpacks.gumroad.com) · Protect your agent 🛡️
-
-</div>
-]]>
